@@ -122,7 +122,7 @@ public abstract class TestingApplicationTests {
 			if (responseClass != String.class) {
 				return new ObjectMapper().readValue(responseString, responseClass);
 			} else {
-				return (Resp) responseString;
+				return responseClass.cast(responseString);
 			}
 		} catch (IOException e) {
 			log.info("outbound request: <<< failed: error {}", e.getMessage());
