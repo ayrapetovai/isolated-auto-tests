@@ -1,6 +1,9 @@
 package com.example.testing;
 
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.platform.commons.util.StringUtils;
@@ -9,7 +12,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-//@TestMethodOrder()
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class SimpleTest extends TestingApplicationTests {
 
   @Override
@@ -22,6 +25,7 @@ public class SimpleTest extends TestingApplicationTests {
    * `demo` service must give one of strings {Hello, Welcome, Cheers} on
    *   request to /greetings/{X}, where X is a number of greeting in {0, 1, 2}.
    */
+  @Order(1)
   @ParameterizedTest
   @CsvSource({"0, Hello", "1, Welcome", "2, Cheers"})
   public void checkGreetingsHappyPass(int greetingNumber, String expectedGreeting) {
@@ -34,6 +38,7 @@ public class SimpleTest extends TestingApplicationTests {
    * `demo` service must not give string on request to /greetings/{X},
    *   where X is NOT in {0, 1, 2}.
    */
+  @Order(2)
   @Test
   public void checkGreetingsFails() {
     assertThrows(Exception.class, () -> restRequest("/greetings/3", null, String.class));
@@ -48,6 +53,7 @@ public class SimpleTest extends TestingApplicationTests {
    *    the name of a user with id == userId and greeting from response of /greetings/{X}.
    *  4. The /greeting/{userId} response must be of format "{GREETING}, {NAME}!".
    */
+  @Order(3)
   @Test
   public void checkGreetingByUserId() {
     record User(int id, String name) { }

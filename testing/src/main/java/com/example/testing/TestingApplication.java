@@ -1,7 +1,5 @@
 package com.example.testing;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,7 +40,7 @@ public class TestingApplication {
 
 		var bodyReader = request.getReader();
 		var body = new StringBuilder();
-		String bodyLine = null;
+		String bodyLine;
 		while (true) {
 			bodyLine = bodyReader.readLine();
 			if (bodyLine != null) {
