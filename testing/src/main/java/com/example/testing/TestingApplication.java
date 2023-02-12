@@ -18,6 +18,8 @@ import java.util.Spliterators;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import static com.example.testing.Util.toJson;
+
 @Slf4j
 @SpringBootApplication
 @RestController
@@ -67,14 +69,6 @@ public class TestingApplication {
 
 		log.info("inbound request: <<< {}", toJson(response));
 		return response;
-	}
-
-	private String toJson(Object obj) {
-		try {
-			return new ObjectMapper().writeValueAsString(obj);
-		} catch (JsonProcessingException e) {
-			throw new RuntimeException(e);
-		}
 	}
 
 	public static void main(String[] args) {

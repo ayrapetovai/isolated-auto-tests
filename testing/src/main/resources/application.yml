@@ -8,6 +8,7 @@ server:
 #    driver: org.postgres.Driver
 logging:
   level:
+    org.testcontainers: warn
     org.apache.catalina.core: warn
     com.zaxxer.hikari: warn
     org.springframework: warn

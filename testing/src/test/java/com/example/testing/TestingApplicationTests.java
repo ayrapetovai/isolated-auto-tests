@@ -1,18 +1,18 @@
 package com.example.testing;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.util.TestPropertyValues;
-import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.web.client.RestTemplate;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -23,16 +23,22 @@ import java.io.IOException;
 import java.util.List;
 import java.util.function.Function;
 
+import static com.example.testing.Util.toJson;
+
 @Slf4j
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@ContextConfiguration(initializers = {TestingApplicationTests.PropertiesInitializer.class})
+@EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class, DataSourceTransactionManagerAutoConfiguration.class})
 class TestingApplicationTests {
 
-	public static PostgreSQLContainer<?> postgreSQLContainer;
-	public static GenericContainer<?> serviceContainer;
+	private static PostgreSQLContainer<?> postgreSQLContainer;
+	private static JdbcTemplate jdbcTemplate;
+	private static GenericContainer<?> serviceContainer;
 
-	@BeforeAll
-	public static void beforeAll() {
+	@Autowired
+	private RestMock restMock;
+
+	@BeforeEach
+	public final void beforeEach() {
 		var postgresPort = 5432;
 		postgreSQLContainer = new PostgreSQLContainer<>("postgres:latest")
 				.withDatabaseName("postgres")
@@ -42,6 +48,14 @@ class TestingApplicationTests {
 				.withExposedPorts(postgresPort);
 		postgreSQLContainer.start();
 		postgreSQLContainer.waitingFor(Wait.forListeningPort());
+
+		var hikariConfig = new HikariConfig();
+		hikariConfig.setJdbcUrl(postgreSQLContainer.getJdbcUrl());
+		hikariConfig.setUsername(postgreSQLContainer.getUsername());
+		hikariConfig.setPassword(postgreSQLContainer.getPassword());
+		hikariConfig.setDriverClassName(postgreSQLContainer.getDriverClassName());
+		var dataSource = new HikariDataSource(hikariConfig);
+		jdbcTemplate = new JdbcTemplate(dataSource);
 
 		var serviceContainerPort = 8080;
 		serviceContainer = new GenericContainer("com.example/demo:latest")
@@ -55,37 +69,20 @@ class TestingApplicationTests {
 		serviceContainer.waitingFor(Wait.forListeningPort());
 	}
 
-	static class PropertiesInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-		public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
-			TestPropertyValues.of(
-					"spring.datasource.url=" + postgreSQLContainer.getJdbcUrl(),
-					"spring.datasource.username=" + postgreSQLContainer.getUsername(),
-					"spring.datasource.password=" + postgreSQLContainer.getPassword(),
-					"spring.datasource.driver=" + postgreSQLContainer.getDriverClassName()
-			).applyTo(configurableApplicationContext.getEnvironment());
-		}
-	}
-
-	@AfterAll
-	public static void afterAll() {
-		serviceContainer.stop();
-		postgreSQLContainer.stop();
-	}
-
-	@Autowired
-	private JdbcTemplate jdbcTemplate;
-
-	@Autowired
-	private RestMock restMock;
-
 	@AfterEach
 	public final void afterEach() {
+		serviceContainer.stop();
+		postgreSQLContainer.stop();
 		restMock.close();
 	}
 
 	public <T> List<T> query(String sql, RowMapper<T> rowMapper) throws DataAccessException {
-		log.info("query: {}", sql);
-		return jdbcTemplate.query(sql, rowMapper);
+		log.info("query: >>> {}", sql);
+		return jdbcTemplate.query(sql, (rs, row) -> {
+			var mapResult = rowMapper.mapRow(rs, row);
+			log.info("query: <<< {}", toJson(mapResult));
+			return mapResult;
+		});
 	}
 
 	public void mockRest(String uriRegexp, Function<RequestData, Object> action) {
@@ -101,15 +98,15 @@ class TestingApplicationTests {
 			log.info("outbound request: >>> {}", uri);
 			var responseEntity = restTemplate.getForEntity("http://localhost:" + port + uri, String.class);
 			responseString = responseEntity.getBody();
+			log.info("outbound request: <<< {}", responseString);
 			if (responseClass != String.class) {
 				return new ObjectMapper().readValue(responseString, responseClass);
 			} else {
 				return (Resp) responseString;
 			}
 		} catch (IOException e) {
+			log.info("outbound request: <<< failed: error {}", e.getMessage());
 			throw new RuntimeException(e);
-		} finally {
-			log.info("outbound request: <<< {}", responseString);
 		}
 	}
 }

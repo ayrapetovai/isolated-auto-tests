@@ -30,6 +30,7 @@ dependencies {
 	annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 	annotationProcessor("org.projectlombok:lombok")
 	testAnnotationProcessor("org.projectlombok:lombok")
+	testCompileOnly("org.junit.jupiter:junit-jupiter-params:5.8.1")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.testcontainers:junit-jupiter")
 	testImplementation("org.testcontainers:postgresql")
