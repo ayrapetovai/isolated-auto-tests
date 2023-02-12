@@ -28,7 +28,7 @@ public class TestingApplication {
 	private final RestMock restMock;
 
 	@GetMapping("/**")
-	public Object intercepter(HttpServletRequest request) throws IOException {
+	public Object interceptor(HttpServletRequest request) throws IOException {
 		record Header(String name, String value) {}
 		var headerMap = StreamSupport.stream(
 						Spliterators.spliteratorUnknownSize(
