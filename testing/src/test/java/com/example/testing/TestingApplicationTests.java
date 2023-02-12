@@ -5,7 +5,9 @@ import com.zaxxer.hikari.HikariDataSource;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration;
@@ -26,9 +28,10 @@ import java.util.function.Function;
 import static com.example.testing.Util.toJson;
 
 @Slf4j
+//@ExtendWith(TestConfigParameterResolver.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class, DataSourceTransactionManagerAutoConfiguration.class})
-class TestingApplicationTests {
+public abstract class TestingApplicationTests {
 
 	private static PostgreSQLContainer<?> postgreSQLContainer;
 	private static JdbcTemplate jdbcTemplate;
@@ -37,8 +40,14 @@ class TestingApplicationTests {
 	@Autowired
 	private RestMock restMock;
 
+	@Value("${server.port}")
+	private Integer selfPort;
+
 	@BeforeEach
 	public final void beforeEach() {
+		var testConfig = new TestConfig();
+		setUpTestConfig(testConfig);
+
 		var postgresPort = 5432;
 		postgreSQLContainer = new PostgreSQLContainer<>("postgres:latest")
 				.withDatabaseName("postgres")
@@ -61,7 +70,7 @@ class TestingApplicationTests {
 		serviceContainer = new GenericContainer("com.example/demo:latest")
 				.withExposedPorts(serviceContainerPort)
 				.withEnv("PORT", String.valueOf(serviceContainerPort))
-				.withEnv("GREETINGS_URL", "http://host.docker.internal:8090/greetings/")
+				.withEnv("GREETINGS_URL", "http://host.docker.internal:" + selfPort + "/")
 				.withEnv("JDBC_URL", "jdbc:postgresql://host.docker.internal:" + postgreSQLContainer.getMappedPort(postgresPort) + "/postgres")
 				.withEnv("DB_USER", "my_db_user")
 				.withEnv("DB_PASS", "my_db_user_password");
@@ -109,4 +118,6 @@ class TestingApplicationTests {
 			throw new RuntimeException(e);
 		}
 	}
+
+	public abstract void setUpTestConfig(TestConfig testConfig);
 }

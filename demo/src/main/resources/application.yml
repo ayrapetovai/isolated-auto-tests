@@ -9,4 +9,4 @@ spring:
   liquibase:
     change-log: liquibase.yml
 app:
-  greetings-url: ${GREETINGS_URL:http://localhost:8080/greetings/}
+  greetings-url: ${GREETINGS_URL:http://localhost:8080/}

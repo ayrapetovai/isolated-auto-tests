@@ -9,7 +9,13 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+//@TestMethodOrder()
 public class SimpleTest extends TestingApplicationTests {
+
+  @Override
+  public void setUpTestConfig(TestConfig testConfig) {
+    testConfig.go = true;
+  }
 
   /**
    * Checking:
@@ -17,11 +23,7 @@ public class SimpleTest extends TestingApplicationTests {
    *   request to /greetings/{X}, where X is a number of greeting in {0, 1, 2}.
    */
   @ParameterizedTest
-  @CsvSource({
-      "0, Hello",
-      "1, Welcome",
-      "2, Cheers"
-  })
+  @CsvSource({"0, Hello", "1, Welcome", "2, Cheers"})
   public void checkGreetingsHappyPass(int greetingNumber, String expectedGreeting) {
     var greeting = restRequest("/greetings/" + greetingNumber, null, String.class);
     assertEquals(expectedGreeting, greeting);
