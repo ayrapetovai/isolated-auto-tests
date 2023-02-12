@@ -72,8 +72,8 @@ public abstract class TestingApplicationTests {
 				.withEnv("PORT", String.valueOf(serviceContainerPort))
 				.withEnv("GREETINGS_URL", "http://host.docker.internal:" + selfPort + "/")
 				.withEnv("JDBC_URL", "jdbc:postgresql://host.docker.internal:" + postgreSQLContainer.getMappedPort(postgresPort) + "/postgres")
-				.withEnv("DB_USER", "my_db_user")
-				.withEnv("DB_PASS", "my_db_user_password");
+				.withEnv("DB_USER", postgreSQLContainer.getUsername())
+				.withEnv("DB_PASS", postgreSQLContainer.getPassword());
 		serviceContainer.start();
 		serviceContainer.waitingFor(Wait.forListeningPort());
 	}
