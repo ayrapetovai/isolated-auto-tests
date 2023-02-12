@@ -1,5 +1,7 @@
 package com.example.testing;
 
+import com.example.testing.template.TestEnvironment;
+import com.example.testing.template.TestingApplicationTests;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;

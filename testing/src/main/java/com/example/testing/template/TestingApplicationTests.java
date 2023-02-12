@@ -1,5 +1,7 @@
-package com.example.testing;
+package com.example.testing.template;
 
+import com.example.testing.RequestData;
+import com.example.testing.RestMock;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import lombok.extern.slf4j.Slf4j;
@@ -78,7 +80,7 @@ public abstract class TestingApplicationTests {
 		jdbcTemplate = new JdbcTemplate(dataSource);
 
 		var serviceContainerPort = 8080;
-		serviceContainer = new GenericContainer("com.example/demo:latest")
+		serviceContainer = new GenericContainer<>("com.example/demo:latest")
 				.withExposedPorts(serviceContainerPort)
 				.withEnv("PORT", String.valueOf(serviceContainerPort))
 				.withEnv("GREETINGS_URL", "http://host.docker.internal:" + selfPort + "/")

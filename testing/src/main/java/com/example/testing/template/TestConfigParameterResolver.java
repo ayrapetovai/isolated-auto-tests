@@ -1,4 +1,4 @@
-package com.example.testing;
+package com.example.testing.template;
 
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ParameterContext;
