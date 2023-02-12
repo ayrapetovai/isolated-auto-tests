@@ -1,0 +1,13 @@
+server:
+  port: 8090
+#spring:
+#  datasource:
+#    username: ${DB_USER:postgres}
+#    password: ${DB_PASS:postgres}
+#    url: ${JDBC_URL:jdbc:postgresql://localhost:5432/postgres}
+#    driver: org.postgres.Driver
+logging:
+  level:
+    org.apache.catalina.core: warn
+    com.zaxxer.hikari: warn
+    org.springframework: warn

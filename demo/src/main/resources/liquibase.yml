@@ -1,0 +1,30 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: Tema
+      changes:
+        - createTable:
+            tableName: auto_test_user
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(20)
+                  constraints:
+                    nullable: false
+  - changeSet:
+      id: 2
+      author: Tema
+      changes:
+        - insert:
+            tableName: auto_test_user
+            columns:
+              - column:
+                  name: name
+                  value: Tema
