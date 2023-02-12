@@ -1,5 +1,5 @@
 package com.example.testing;
 
-public class TestConfig {
+public class TestEnvironment {
   public boolean go = false;
 }

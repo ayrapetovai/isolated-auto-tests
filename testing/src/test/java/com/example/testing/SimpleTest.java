@@ -13,8 +13,8 @@ import static org.junit.jupiter.api.Assertions.*;
 public class SimpleTest extends TestingApplicationTests {
 
   @Override
-  public void setUpTestConfig(TestConfig testConfig) {
-    testConfig.go = true;
+  public void setUpTestEnvironment(TestEnvironment testEnvironment) {
+    testEnvironment.go = true;
   }
 
   /**

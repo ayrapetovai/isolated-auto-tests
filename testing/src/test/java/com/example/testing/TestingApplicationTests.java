@@ -3,7 +3,9 @@ package com.example.testing;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +30,7 @@ import java.util.function.Function;
 import static com.example.testing.Util.toJson;
 
 @Slf4j
-//@ExtendWith(TestConfigParameterResolver.class)
+@ExtendWith(TestConfigParameterResolver.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class, DataSourceTransactionManagerAutoConfiguration.class})
 public abstract class TestingApplicationTests {
@@ -43,10 +45,19 @@ public abstract class TestingApplicationTests {
 	@LocalServerPort
 	private Integer selfPort;
 
+	@BeforeAll
+	public static void beforeAll(TestEnvironment testEnvironment) {
+
+	}
+
+	@AfterAll
+	public static void afterAll(TestEnvironment testEnvironment) {
+
+	}
+
 	@BeforeEach
-	public final void beforeEach() {
-		var testConfig = new TestConfig();
-		setUpTestConfig(testConfig);
+	public final void beforeEach(TestEnvironment testEnvironment) {
+		setUpTestEnvironment(testEnvironment);
 
 		var postgresPort = 5432;
 		postgreSQLContainer = new PostgreSQLContainer<>("postgres:latest")
@@ -119,5 +130,5 @@ public abstract class TestingApplicationTests {
 		}
 	}
 
-	public abstract void setUpTestConfig(TestConfig testConfig);
+	public abstract void setUpTestEnvironment(TestEnvironment testEnvironment);
 }
