@@ -8,10 +8,7 @@ import com.example.testing.template.view.DbView;
 import com.example.testing.template.view.MockView;
 import com.example.testing.template.view.RestView;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class TestEnvironment {
 
@@ -24,11 +21,9 @@ public class TestEnvironment {
   }
 
   public ApplicationTemplate getByType(Class<?> type) {
-    return registrants.stream().filter(r -> {
-      return r instanceof PostgresTemplate && type == DbView.class ||
-          r instanceof MockTemplate && type == MockView.class ||
-          r instanceof ServiceTemplate && type == RestView.class;
-    }).findFirst().orElse(null);
+    return registrants.stream().filter(r -> r instanceof PostgresTemplate && type == DbView.class ||
+        r instanceof MockTemplate && type == MockView.class ||
+        r instanceof ServiceTemplate && type == RestView.class).findFirst().orElse(null);
   }
 
   public PostgresTemplate postgres(String id, String imageName) {
@@ -65,9 +60,13 @@ public class TestEnvironment {
   }
 
   void close() {
-    for (var registrant : registrants) {
+    var registrantsReversed = new ArrayList<>(registrants);
+    Collections.reverse(registrantsReversed);
+
+    for (var registrant : registrantsReversed) {
       registrant.close();
     }
+
     registrants.clear();
     registrantsCache.clear();
   }
