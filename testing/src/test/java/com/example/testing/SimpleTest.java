@@ -53,6 +53,7 @@ public class SimpleTest extends TestTemplate {
   @Order(2)
   @Test
   public void checkGreetingsFails(RestView testTarget) {
+    assertThrows(Exception.class, () -> testTarget.restRequest("/greetings/-1", null, String.class));
     assertThrows(Exception.class, () -> testTarget.restRequest("/greetings/3", null, String.class));
     assertThrows(Exception.class, () -> testTarget.restRequest("/greetings/abc", null, String.class));
   }
