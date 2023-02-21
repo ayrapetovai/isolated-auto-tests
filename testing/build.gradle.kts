@@ -1,5 +1,7 @@
 plugins {
 	java
+	`maven-publish`
+	`java-library`
 	id("org.springframework.boot") version "3.0.2"
 	id("io.spring.dependency-management") version "1.1.0"
 }
@@ -15,6 +17,7 @@ configurations {
 }
 
 repositories {
+	mavenLocal()
 	mavenCentral()
 }
 
@@ -26,14 +29,14 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	compileOnly("org.projectlombok:lombok")
 	testCompileOnly("org.projectlombok:lombok")
-	runtimeOnly("org.postgresql:postgresql")
+	implementation("org.postgresql:postgresql")
 	annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 	annotationProcessor("org.projectlombok:lombok")
 	testAnnotationProcessor("org.projectlombok:lombok")
-	compileOnly("org.junit.jupiter:junit-jupiter-params:5.8.1")
 	implementation("org.springframework.boot:spring-boot-starter-test")
 	implementation("org.testcontainers:junit-jupiter")
 	implementation("org.testcontainers:postgresql")
+	// TODO: make dependencies to get to the target project
 }
 
 dependencyManagement {
@@ -44,4 +47,30 @@ dependencyManagement {
 
 tasks.withType<Test> {
 	useJUnitPlatform()
+}
+
+tasks.getByName<Jar>("jar") {
+	enabled = true
+}
+
+publishing {
+	tasks.publish.get().dependsOn("build")
+	repositories {
+		mavenLocal()
+	}
+	publications {
+		create<MavenPublication>("install") {
+			artifactId = rootProject.name
+			from(components["java"])
+
+			versionMapping {
+				usage("java-api") {
+					fromResolutionOf("runtimeClasspath")
+				}
+				usage("java-runtime") {
+					fromResolutionResult()
+				}
+			}
+		}
+	}
 }

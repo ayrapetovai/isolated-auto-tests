@@ -1,11 +1,14 @@
-package com.example.testing;
+package testing;
 
 import com.example.testing.template.TestEnvironment;
 import com.example.testing.template.TestTemplate;
 import com.example.testing.template.view.DbView;
 import com.example.testing.template.view.MockView;
 import com.example.testing.template.view.RestView;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.platform.commons.util.StringUtils;
@@ -14,7 +17,6 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@Disabled
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class SimpleTest extends TestTemplate {
 

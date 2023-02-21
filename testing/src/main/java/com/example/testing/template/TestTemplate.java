@@ -1,5 +1,6 @@
 package com.example.testing.template;
 
+import com.example.testing.TestingApplication;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -16,7 +17,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 @Parameterized.UseParametersRunnerFactory
 @ExtendWith({TestConfigParameterResolver.class})
 // DEFINED_PORT makes MVC run without mocks
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+@SpringBootTest(classes = {TestingApplication.class}, webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 // Exclude JDBC auto configurations, because we set properties in "runtime"
 @EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class, DataSourceTransactionManagerAutoConfiguration.class})
 public abstract class TestTemplate {
