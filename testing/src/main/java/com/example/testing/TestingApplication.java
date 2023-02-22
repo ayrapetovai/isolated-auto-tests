@@ -40,32 +40,34 @@ public class TestingApplication {
 				).map(headerName -> new Header(headerName, request.getHeader(headerName)))
 				.collect(Collectors.toMap(Header::name, Header::value));
 
-		var bodyReader = request.getReader();
 		var body = new StringBuilder();
-		String bodyLine;
-		while (true) {
-			bodyLine = bodyReader.readLine();
-			if (bodyLine != null) {
-				body.append(bodyLine);
-			} else {
-				break;
+		var bodyReadError = "";
+		try(var bodyReader = request.getReader()) {
+			String bodyLine;
+			while (true) {
+				bodyLine = bodyReader.readLine();
+				if (bodyLine != null) {
+					body.append(bodyLine);
+				} else {
+					break;
+				}
 			}
+		} catch (Exception e) {
+			log.error("failed to read the body of the request", e);
+			bodyReadError = e.getMessage();
 		}
-		bodyReader.close();
 
 		var requestData = new RequestData(
 				request.getMethod(),
 				request.getRequestURI(),
 				new HashMap<>(request.getParameterMap()),
 				headerMap,
-				body.toString()
+				body.toString(),
+				bodyReadError
 		);
 
 		log.info("inbound request: >>> {}", requestData);
-		var response = restMock.handle(
-				request.getRequestURI(),
-				requestData
-		);
+		var response = restMock.handle(request.getRequestURI(), requestData);
 
 		log.info("inbound request: <<< {}", toJson(response));
 		return response;

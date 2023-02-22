@@ -55,12 +55,16 @@ public class ServiceTemplate implements ApplicationTemplate {
   }
 
   public LazyGetter getBaseUrl() {
+    return () -> "http://host.docker.internal:" + serviceContainer.getMappedPort(servicePort) + "/";
+  }
+
+  public LazyGetter getSelfUrl() {
     return () -> {
       String host = "localhost";
       if (DockerUtils.runsInDockerContainer()) {
         host = "host.docker.internal";
       }
-      return "http://" + host + ":" + serviceContainer.getMappedPort(servicePort);
+      return "http://" + host + ":" + serviceContainer.getMappedPort(servicePort) + "/";
     };
   }
 

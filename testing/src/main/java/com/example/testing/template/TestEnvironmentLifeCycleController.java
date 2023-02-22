@@ -1,7 +1,9 @@
 package com.example.testing.template;
 
+import com.example.testing.EnvironmentView;
 import com.example.testing.IsolatedAutoTest;
 import com.example.testing.TestEnvironmentInitializer;
+import com.example.testing.template.conf.ApplicationTemplate;
 import com.example.testing.template.conf.MockTemplate;
 import com.example.testing.template.conf.PostgresTemplate;
 import com.example.testing.template.conf.ServiceTemplate;
@@ -36,7 +38,16 @@ public class TestEnvironmentLifeCycleController implements ParameterResolver, Be
       return environmentsByTestClasses.get(testClass);
     }
     var testEnvironment = environmentsByTestClasses.get(testClass);
-    var applicationTemplate = testEnvironment.getById(param.getName());
+    var annotationOnViewParameter = param.getDeclaredAnnotation(EnvironmentView.class);
+    ApplicationTemplate applicationTemplate = null;
+
+    if (annotationOnViewParameter != null) {
+      var providerId = annotationOnViewParameter.id();
+      applicationTemplate = testEnvironment.getById(providerId);
+    }
+    if (applicationTemplate == null) {
+      applicationTemplate = testEnvironment.getById(param.getName());
+    }
     if (applicationTemplate == null) {
       applicationTemplate = testEnvironment.getByType(param.getType());
     }

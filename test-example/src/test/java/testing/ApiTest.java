@@ -22,7 +22,7 @@ public class ApiTest {
     var mock = testEnvironment.mock("mock");
     testEnvironment.service("testTarget", "com.example/demo:latest")
         .env("LOG_LEVEL", "DEBUG")
-        .env("GREETINGS_URL", mock.getSelfUrl())
+        .env("GREETINGS_URL", mock.getBaseUrl())
         .env("JDBC_URL", db.getJdbcUrl())
         .env("DB_USER", db.getUser())
         .env("DB_PASS", db.getPassword());

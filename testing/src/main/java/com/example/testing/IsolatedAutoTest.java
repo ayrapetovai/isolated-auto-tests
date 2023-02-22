@@ -8,8 +8,10 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 @Parameterized.UseParametersRunnerFactory
 @ExtendWith({TestEnvironmentLifeCycleController.class})
@@ -18,5 +20,6 @@ import java.lang.annotation.RetentionPolicy;
 // Exclude JDBC auto configurations, because we set properties in "runtime"
 @EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class, DataSourceTransactionManagerAutoConfiguration.class})
 @Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
 public @interface IsolatedAutoTest {
 }

@@ -22,7 +22,7 @@ public class FunctionalTest {
     var mock = testEnvironment.mock("mock");
     testEnvironment.service("testTarget", "com.example/demo:latest")
         .env("LOG_LEVEL", "DEBUG")
-        .env("GREETINGS_URL", mock.getSelfUrl())
+        .env("GREETINGS_URL", mock.getBaseUrl())
         .env("JDBC_URL", db.getJdbcUrl())
         .env("DB_USER", db.getUser())
         .env("DB_PASS", db.getPassword());
@@ -51,7 +51,7 @@ public class FunctionalTest {
     assertTrue(StringUtils.isNotBlank(userName));
 
     var substitutionForGreeting = "HELLO";
-    mock.mockRest("/greetings/[0-2]{1}", requestData -> {
+    mock.mockEndpoint("/greetings/[0-2]{1}", requestData -> {
       assertEquals("GET", requestData.method());
       var uri = requestData.uri();
       var paramString = uri.substring(uri.lastIndexOf('/') + 1);

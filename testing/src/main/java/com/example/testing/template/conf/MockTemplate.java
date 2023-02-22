@@ -18,7 +18,7 @@ public class MockTemplate implements ApplicationTemplate {
     this.id = id;
   }
 
-  public LazyGetter getSelfUrl() {
+  public LazyGetter getBaseUrl() {
     return () -> "http://host.docker.internal:" + this.selfPort + "/";
   }
 

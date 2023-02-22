@@ -7,5 +7,6 @@ public record RequestData(
     String uri,
     Map<String, String[]> parameters,
     Map<String, String> headers,
-    String body
+    String body,
+    String bodyReadError
 ){}

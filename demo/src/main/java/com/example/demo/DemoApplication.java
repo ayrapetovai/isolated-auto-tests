@@ -45,7 +45,7 @@ public class DemoApplication {
 		);
 
 		var index = new Random().nextInt(GREETINGS.size());
-		var greetingsResp = restTemplate.getForEntity(greetingsUrl + "greetings/" + index, String.class);
+		var greetingsResp = restTemplate.getForEntity(greetingsUrl + "/greetings/" + index, String.class);
 		var greeting = greetingsResp.getBody();
 		return greeting + ", " + userName + "!";
 	}

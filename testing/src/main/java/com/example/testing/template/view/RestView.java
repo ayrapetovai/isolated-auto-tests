@@ -17,7 +17,7 @@ public class RestView {
   }
 
   public RestTemplate getRestTemplate(boolean throwOnHttpError) {
-    var host = serviceTemplate.getBaseUrl().get();
+    var host = serviceTemplate.getSelfUrl().get();
     var restTemplate = new RestTemplate();
     restTemplate.setUriTemplateHandler(new RootUriTemplateHandler(host));
     restTemplate.setInterceptors(List.of((request, body, execution) -> {

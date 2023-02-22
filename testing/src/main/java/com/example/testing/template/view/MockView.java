@@ -13,7 +13,8 @@ public class MockView {
     this.mockTemplate = mockTemplate;
   }
 
-  public void mockRest(String uriRegexp, Function<RequestData, Object> action) {
+  // TODO muck actual response, not only response body?
+  public void mockEndpoint(String uriRegexp, Function<RequestData, Object> action) {
 //    log.info("mock rest endpoint `{}`", uriRegexp);
     mockTemplate.getRestMock().on(uriRegexp, action);
   }
