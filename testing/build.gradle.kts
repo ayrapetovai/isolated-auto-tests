@@ -8,6 +8,7 @@ plugins {
 
 group = "com.example"
 version = "0.0.1-SNAPSHOT"
+
 java.sourceCompatibility = JavaVersion.VERSION_17
 
 configurations {
@@ -37,6 +38,15 @@ dependencies {
 	implementation("org.testcontainers:junit-jupiter")
 	implementation("org.testcontainers:postgresql")
 	// TODO: make dependencies to get to the target project
+}
+
+configurations {
+	apiElements {
+		outgoing {
+			capability("org.springframework.data:spring-data-jdbc:3.0.1")
+			capability("org.junit.jupiter:junit-jupiter:5.9.2")
+		}
+	}
 }
 
 dependencyManagement {
