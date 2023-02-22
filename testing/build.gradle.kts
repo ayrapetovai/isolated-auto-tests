@@ -37,7 +37,6 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-test")
 	implementation("org.testcontainers:junit-jupiter")
 	implementation("org.testcontainers:postgresql")
-	// TODO: make dependencies to get to the target project
 }
 
 configurations {
