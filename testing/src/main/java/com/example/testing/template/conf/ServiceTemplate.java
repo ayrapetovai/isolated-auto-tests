@@ -1,5 +1,6 @@
 package com.example.testing.template.conf;
 
+import com.example.testing.util.DockerUtils;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 
@@ -46,14 +47,22 @@ public class ServiceTemplate implements ApplicationTemplate {
     return serviceContainer.getMappedPort(servicePort);
   }
 
+  public LazyGetter getBaseUrl() {
+    return () -> {
+      String host = "localhost";
+      if (DockerUtils.runsInDockerContainer()) {
+        host = "host.docker.internal";
+      }
+      return "http://" + host + ":" + serviceContainer.getMappedPort(servicePort);
+    };
+  }
+
   @Override
   public void createAndAwait() {
     serviceContainer = new GenericContainer<>(imageName)
         .withExposedPorts(servicePort)
         .withEnv("PORT", String.valueOf(servicePort));
-    env.forEach((name, lazyGetter) -> {
-      serviceContainer.withEnv(name, lazyGetter.get());
-    });
+    env.forEach((name, lazyGetter) -> serviceContainer.withEnv(name, lazyGetter.get()));
     serviceContainer.start();
     serviceContainer.waitingFor(Wait.forListeningPort());
   }

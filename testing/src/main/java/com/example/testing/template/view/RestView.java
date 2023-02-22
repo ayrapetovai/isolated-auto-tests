@@ -1,6 +1,7 @@
 package com.example.testing.template.view;
 
 import com.example.testing.template.conf.ServiceTemplate;
+import org.springframework.boot.web.client.RootUriTemplateHandler;
 import org.springframework.web.client.RestTemplate;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -13,12 +14,13 @@ public class RestView {
   }
 
   public <Req, Resp> Resp restRequest(String uri, Req request, Class<Resp> responseClass) {
-    var port = serviceTemplate.getMapperServicePort();
+    var host = serviceTemplate.getBaseUrl();
     var restTemplate = new RestTemplate();
+    restTemplate.setUriTemplateHandler(new RootUriTemplateHandler(host.get()));
     var responseString = "";
     try {
 //      log.info("outbound request: >>> {}", uri);
-      var responseEntity = restTemplate.getForEntity("http://localhost:" + port + uri, String.class);
+      var responseEntity = restTemplate.getForEntity(uri, String.class);
       responseString = responseEntity.getBody();
 //      log.info("outbound request: <<< {}", responseString);
       if (responseClass != String.class) {
