@@ -7,12 +7,12 @@ import lombok.Getter;
 
 public class MockTemplate implements ApplicationTemplate {
 
+  private final String id;
+  @Getter
+  private final boolean isStatic = true;
   private Integer selfPort;
-
   @Getter
   private RestMock restMock;
-
-  private final String id;
 
   public MockTemplate(String id) {
     this.id = id;
@@ -35,5 +35,10 @@ public class MockTemplate implements ApplicationTemplate {
 
   @Override
   public void close() {
+  }
+
+  @Override
+  public void finallyClose() {
+
   }
 }

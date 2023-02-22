@@ -1,6 +1,7 @@
 package com.example.testing.template.conf;
 
 import com.example.testing.util.DockerUtils;
+import lombok.Getter;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 
@@ -11,7 +12,8 @@ public class ServiceTemplate implements ApplicationTemplate {
 
   private final String id;
   private final String imageName;
-
+  @Getter
+  private boolean isStatic = false;
   private int servicePort = 8080;
 
   private GenericContainer<?> serviceContainer;
@@ -43,6 +45,11 @@ public class ServiceTemplate implements ApplicationTemplate {
     return id;
   }
 
+  public ServiceTemplate isStatic(boolean isStatic) {
+    this.isStatic = isStatic;
+    return this;
+  }
+
   public int getMapperServicePort() {
     return serviceContainer.getMappedPort(servicePort);
   }
@@ -59,6 +66,10 @@ public class ServiceTemplate implements ApplicationTemplate {
 
   @Override
   public void createAndAwait() {
+    if (isStatic && serviceContainer != null && serviceContainer.isCreated()) {
+      return;
+    }
+
     serviceContainer = new GenericContainer<>(imageName)
         .withExposedPorts(servicePort)
         .withEnv("PORT", String.valueOf(servicePort));
@@ -69,6 +80,16 @@ public class ServiceTemplate implements ApplicationTemplate {
 
   @Override
   public void close() {
-    serviceContainer.close();
+    if (!isStatic && serviceContainer != null && serviceContainer.isCreated()) {
+      serviceContainer.close();
+      serviceContainer = null;
+    }
+  }
+
+  @Override
+  public void finallyClose() {
+    if (serviceContainer != null && serviceContainer.isCreated()) {
+      serviceContainer.close();
+    }
   }
 }

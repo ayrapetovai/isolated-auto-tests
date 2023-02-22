@@ -11,6 +11,8 @@ public class PostgresTemplate implements ApplicationTemplate {
 
   private final String id;
   private final String imageName;
+  @Getter
+  private boolean isStatic = false;
   private PostgreSQLContainer<?> postgreSQLContainer;
   @Getter
   private JdbcTemplate jdbcTemplate;
@@ -20,6 +22,11 @@ public class PostgresTemplate implements ApplicationTemplate {
   public PostgresTemplate(String id, String imageName) {
     this.id = id;
     this.imageName = imageName;
+  }
+
+  public PostgresTemplate isStatic(boolean isStatic) {
+    this.isStatic = isStatic;
+    return this;
   }
 
   public LazyGetter getJdbcUrl() {
@@ -51,6 +58,10 @@ public class PostgresTemplate implements ApplicationTemplate {
 
   @Override
   public void createAndAwait() {
+    if (isStatic && postgreSQLContainer != null && postgreSQLContainer.isCreated()) {
+      return;
+    }
+
     postgreSQLContainer = new PostgreSQLContainer<>(imageName)
         .withDatabaseName(postgresDatabase)
         .withUsername("my_db_user")
@@ -71,6 +82,16 @@ public class PostgresTemplate implements ApplicationTemplate {
 
   @Override
   public void close() {
-    postgreSQLContainer.close();
+    if (!isStatic && postgreSQLContainer != null && postgreSQLContainer.isCreated()) {
+      postgreSQLContainer.close();
+      postgreSQLContainer = null;
+    }
+  }
+
+  @Override
+  public void finallyClose() {
+    if (postgreSQLContainer != null && postgreSQLContainer.isCreated()) {
+      postgreSQLContainer.close();
+    }
   }
 }

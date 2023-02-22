@@ -14,7 +14,7 @@ public class TestEnvironment {
 
   // order is taken to account
   private final List<ApplicationTemplate> registrants = new ArrayList<>();
-  private final Map<String, ApplicationTemplate> registrantsCache = new HashMap<>();
+  private final Map<String, ApplicationTemplate> registrantCache = new HashMap<>();
 
   public ApplicationTemplate getById(String name) {
     return registrants.stream().filter(r -> r.getId().equals(name)).findFirst().orElse(null);
@@ -27,8 +27,8 @@ public class TestEnvironment {
   }
 
   public PostgresTemplate postgres(String id, String imageName) {
-    if (registrantsCache.containsKey(id)) {
-      return (PostgresTemplate) registrantsCache.get(id);
+    if (registrantCache.containsKey(id)) {
+      return (PostgresTemplate) registrantCache.get(id);
     }
     var app = new PostgresTemplate(id, imageName);
     registrants.add(app);
@@ -36,8 +36,8 @@ public class TestEnvironment {
   }
 
   public MockTemplate mock(String id) {
-    if (registrantsCache.containsKey(id)) {
-      return (MockTemplate) registrantsCache.get(id);
+    if (registrantCache.containsKey(id)) {
+      return (MockTemplate) registrantCache.get(id);
     }
     var app = new MockTemplate(id);
     registrants.add(app);
@@ -45,8 +45,8 @@ public class TestEnvironment {
   }
 
   public ServiceTemplate service(String id, String imageName) {
-    if (registrantsCache.containsKey(id)) {
-      return (ServiceTemplate) registrantsCache.get(id);
+    if (registrantCache.containsKey(id)) {
+      return (ServiceTemplate) registrantCache.get(id);
     }
     var app = new ServiceTemplate(id, imageName);
     registrants.add(app);
@@ -59,7 +59,7 @@ public class TestEnvironment {
     }
   }
 
-  void close() {
+  void closeNonStatic() {
     var registrantsReversed = new ArrayList<>(registrants);
     Collections.reverse(registrantsReversed);
 
@@ -67,9 +67,19 @@ public class TestEnvironment {
       registrant.close();
     }
 
-    registrants.clear();
-    registrantsCache.clear();
   }
+
+  public void closeAll() {
+    var registrantsReversed = new ArrayList<>(registrants);
+    Collections.reverse(registrantsReversed);
+
+    for (var registrant : registrantsReversed) {
+      registrant.finallyClose();
+    }
+    registrants.clear();
+    registrantCache.clear();
+  }
+
 
   public int registrantsSize() {
     return registrants.size();
