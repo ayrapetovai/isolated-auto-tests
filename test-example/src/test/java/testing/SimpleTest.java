@@ -25,11 +25,11 @@ public class SimpleTest {
     var db = testEnvironment.postgres("db", "postgres:latest");
     var mock = testEnvironment.mock("mock");
     testEnvironment.service("testTarget", "com.example/demo:latest")
-      .env("LOG_LEVEL", "DEBUG")
-      .env("GREETINGS_URL", mock.getSelfUrl())
-      .env("JDBC_URL", db.getJdbcUrl())
-      .env("DB_USER", db.getUser())
-      .env("DB_PASS", db.getPassword());
+        .env("LOG_LEVEL", "DEBUG")
+        .env("GREETINGS_URL", mock.getSelfUrl())
+        .env("JDBC_URL", db.getJdbcUrl())
+        .env("DB_USER", db.getUser())
+        .env("DB_PASS", db.getPassword());
   }
 
   /**
