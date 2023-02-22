@@ -5,13 +5,11 @@ import com.example.testing.template.TestTemplate;
 import com.example.testing.template.view.DbView;
 import com.example.testing.template.view.MockView;
 import com.example.testing.template.view.RestView;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.platform.commons.util.StringUtils;
+import org.springframework.http.HttpStatus;
 
 import java.util.List;
 
@@ -41,7 +39,8 @@ public class SimpleTest extends TestTemplate {
   @ParameterizedTest
   @CsvSource({"0, Hello", "1, Welcome", "2, Cheers"})
   public void checkGreetingsHappyPass(int greetingNumber, String expectedGreeting, RestView testTarget) {
-    var greeting = testTarget.restRequest("/greetings/" + greetingNumber, null, String.class);
+    var greeting = testTarget.getRestTemplate()
+        .getForObject("/greetings/" + greetingNumber, String.class);
     assertEquals(expectedGreeting, greeting);
   }
 
@@ -53,9 +52,10 @@ public class SimpleTest extends TestTemplate {
   @Order(2)
   @Test
   public void checkGreetingsFails(RestView testTarget) {
-    assertThrows(Exception.class, () -> testTarget.restRequest("/greetings/-1", null, String.class));
-    assertThrows(Exception.class, () -> testTarget.restRequest("/greetings/3", null, String.class));
-    assertThrows(Exception.class, () -> testTarget.restRequest("/greetings/abc", null, String.class));
+    var restTemplate = testTarget.getRestTemplate(false);
+    assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, restTemplate.getForEntity("/greetings/-1", String.class).getStatusCode());
+    assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, restTemplate.getForEntity("/greetings/3", String.class).getStatusCode());
+    assertEquals(HttpStatus.BAD_REQUEST, restTemplate.getForEntity("/greetings/abc", String.class).getStatusCode());
   }
 
   /**
@@ -90,7 +90,8 @@ public class SimpleTest extends TestTemplate {
     });
 
     var expectedMessage = substitutionForGreeting + ", " + userName + "!";
-    var message = testTarget.restRequest("/greeting/" + userId, null, String.class);
+    var message = testTarget.getRestTemplate()
+        .getForObject("/greeting/" + userId, String.class);
     assertEquals(expectedMessage, message);
   }
 

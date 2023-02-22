@@ -1,9 +1,12 @@
 package com.example.testing.template.view;
 
 import com.example.testing.template.conf.ServiceTemplate;
+import com.example.testing.util.NoThrowErrorHandler;
 import org.springframework.boot.web.client.RootUriTemplateHandler;
 import org.springframework.web.client.RestTemplate;
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.net.URI;
+import java.util.List;
 
 public class RestView {
 
@@ -13,24 +16,29 @@ public class RestView {
     this.serviceTemplate = serviceTemplate;
   }
 
-  public <Req, Resp> Resp restRequest(String uri, Req request, Class<Resp> responseClass) {
-    var host = serviceTemplate.getBaseUrl();
+  public RestTemplate getRestTemplate(boolean throwOnHttpError) {
+    var host = serviceTemplate.getBaseUrl().get();
     var restTemplate = new RestTemplate();
-    restTemplate.setUriTemplateHandler(new RootUriTemplateHandler(host.get()));
-    var responseString = "";
-    try {
-//      log.info("outbound request: >>> {}", uri);
-      var responseEntity = restTemplate.getForEntity(uri, String.class);
-      responseString = responseEntity.getBody();
-//      log.info("outbound request: <<< {}", responseString);
-      if (responseClass != String.class) {
-        return new ObjectMapper().readValue(responseString, responseClass);
-      } else {
-        return responseClass.cast(responseString);
+    restTemplate.setUriTemplateHandler(new RootUriTemplateHandler(host));
+    restTemplate.setInterceptors(List.of((request, body, execution) -> {
+      var givenHost = request.getURI().getHost() + ":" + (request.getURI().getPort() > 0? request.getURI().getPort(): 80);
+      var targetUri = URI.create(host);
+      var targetHost = targetUri.getHost() + ":" + targetUri.getPort();
+      if (!targetHost.equals(givenHost)) {
+        var id = serviceTemplate.getId();
+        throw new IllegalStateException(
+            "this rest template allowed to send request only to service " + id + " at " + targetHost + ", given " + givenHost
+        );
       }
-    } catch (Exception e) {
-//      log.info("outbound request: <<< failed: error {}", e.getMessage());
-      throw new RuntimeException(e);
+      return execution.execute(request, body);
+    }));
+    if (!throwOnHttpError) {
+      restTemplate.setErrorHandler(new NoThrowErrorHandler());
     }
+    return restTemplate;
+  }
+
+  public RestTemplate getRestTemplate() {
+    return getRestTemplate(true);
   }
 }
