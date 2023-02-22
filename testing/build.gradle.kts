@@ -9,7 +9,11 @@ plugins {
 group = "com.example"
 version = "0.0.1-SNAPSHOT"
 
-java.sourceCompatibility = JavaVersion.VERSION_17
+java {
+	sourceCompatibility = JavaVersion.VERSION_17
+//	withJavadocJar()
+//	withSourcesJar()
+}
 
 configurations {
 	compileOnly {
@@ -53,6 +57,14 @@ dependencyManagement {
 		mavenBom("org.testcontainers:testcontainers-bom:${property("testcontainersVersion")}")
 	}
 }
+
+//sourceSets {
+//	main {
+//		java {
+//			setSrcDirs(setOf("src"))
+//		}
+//	}
+//}
 
 tasks.withType<Test> {
 	useJUnitPlatform()

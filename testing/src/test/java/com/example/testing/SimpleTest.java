@@ -1,7 +1,6 @@
 package com.example.testing;
 
 import com.example.testing.template.TestEnvironment;
-import com.example.testing.template.TestTemplate;
 import com.example.testing.template.view.DbView;
 import com.example.testing.template.view.MockView;
 import com.example.testing.template.view.RestView;
@@ -17,10 +16,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @Disabled
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class SimpleTest extends TestTemplate {
+@IsolatedAutoTest
+public class SimpleTest {
 
-  @Override
-  public void setUpTestEnvironment(TestEnvironment testEnvironment) {
+  @TestEnvironmentInitializer
+  public void initTestEnv(TestEnvironment testEnvironment) {
     var db = testEnvironment.postgres("db", "postgres:latest");
     var mock = testEnvironment.mock("mock");
     testEnvironment.service("testTarget", "com.example/demo:latest")

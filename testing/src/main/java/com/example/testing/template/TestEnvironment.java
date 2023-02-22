@@ -71,4 +71,8 @@ public class TestEnvironment {
     registrantsCache.clear();
   }
 
+  public int registrantsSize() {
+    return registrants.size();
+  }
+
 }
