@@ -70,8 +70,9 @@ public class SimpleTest extends TestTemplate {
   @Test
   public void checkGreetingByUserId(RestView testTarget, DbView db, MockView mock) {
     record User(int id, String name) { }
-    var users = db.query("select id, name from auto_test_user",
-        (rs, row) -> new User(rs.getInt("id"), rs.getString("name")));
+    var users = db.getJdbcTemplate()
+        .query("select id, name from auto_test_user",
+            (rs, row) -> new User(rs.getInt("id"), rs.getString("name")));
     assertFalse(users.isEmpty());
 
     var firstRandomUser = users.stream().findFirst().get();
