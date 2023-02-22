@@ -18,6 +18,8 @@ public class PostgresTemplate implements ApplicationTemplate {
   private JdbcTemplate jdbcTemplate;
   private int postgresPort = 5432;
   private String postgresDatabase = "postgres";
+  private String databaseUser = "my_db_user";
+  private String databaseUserPassword = "my_db_user_password";
 
   public PostgresTemplate(String id, String imageName) {
     this.id = id;
@@ -39,6 +41,16 @@ public class PostgresTemplate implements ApplicationTemplate {
 
   public LazyGetter getPassword() {
     return () -> this.postgreSQLContainer.getPassword();
+  }
+
+  public PostgresTemplate user(String user) {
+    this.databaseUser = user;
+    return this;
+  }
+
+  public PostgresTemplate password(String password) {
+    this.databaseUserPassword = password;
+    return this;
   }
 
   public PostgresTemplate port(int port) {
@@ -64,8 +76,8 @@ public class PostgresTemplate implements ApplicationTemplate {
 
     postgreSQLContainer = new PostgreSQLContainer<>(imageName)
         .withDatabaseName(postgresDatabase)
-        .withUsername("my_db_user")
-        .withPassword("my_db_user_password")
+        .withUsername(databaseUser)
+        .withPassword(databaseUserPassword)
         .withEnv("PGPORT", String.valueOf(postgresPort)) // TODO: this line does not anything
         .withExposedPorts(postgresPort);
     postgreSQLContainer.start();
