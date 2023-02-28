@@ -14,6 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -62,8 +63,18 @@ public class RestMock {
   }
 
   public void clear() {
-    requestHandlers.clear();
-    registeredCalls.clear();
+    try {
+      var fails = requestHandlers.values().stream()
+          .map(RequestHandler::fails)
+          .flatMap(List::stream)
+          .collect(Collectors.toList());
+      if (!fails.isEmpty()) {
+        throw new AggregateException("closing " + this.getClass().getSimpleName() + " failed with errors", fails);
+      }
+    } finally {
+      requestHandlers.clear();
+      registeredCalls.clear();
+    }
   }
 
   public void waitFor(String uriRegexp, int count, Duration duration) {
@@ -76,7 +87,7 @@ public class RestMock {
     while (true) {
       if (registeredCalls.computeIfAbsent(uriRegexp, k -> 0) >= count) {
         if (!requestHandler.fails.isEmpty()) {
-          throw new AggregateException(requestHandler.fails);
+          throw new AggregateException("waiting for " + uriRegexp + " failed with errors", requestHandler.fails);
         }
         break;
       }

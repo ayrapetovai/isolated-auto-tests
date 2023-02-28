@@ -1,5 +1,6 @@
 package com.example.testing.template;
 
+import com.example.testing.AggregateException;
 import com.example.testing.template.conf.ApplicationTemplate;
 import com.example.testing.template.conf.MockTemplate;
 import com.example.testing.template.conf.PostgresTemplate;
@@ -63,21 +64,39 @@ public class TestEnvironment {
     var registrantsReversed = new ArrayList<>(registrants);
     Collections.reverse(registrantsReversed);
 
+    var errors = new ArrayList<Exception>();
     for (var registrant : registrantsReversed) {
-      registrant.close();
+      try {
+        registrant.close();
+      } catch (Exception e) {
+        errors.add(e);
+      }
     }
 
+    if (!errors.isEmpty()) {
+      throw new AggregateException("close non static failed with errors", errors);
+    }
   }
 
   public void closeAll() {
     var registrantsReversed = new ArrayList<>(registrants);
     Collections.reverse(registrantsReversed);
 
+    var errors = new ArrayList<Exception>();
     for (var registrant : registrantsReversed) {
-      registrant.finallyClose();
+      try {
+        registrant.finallyClose();
+      } catch (Exception e) {
+        errors.add(e);
+      }
     }
+
     registrants.clear();
     registrantCache.clear();
+
+    if (!errors.isEmpty()) {
+      throw new AggregateException("close all failed with errors", errors);
+    }
   }
 
 
