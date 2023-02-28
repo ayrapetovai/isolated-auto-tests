@@ -24,7 +24,8 @@ public class SimpleTest {
   public void initTestEnv(TestEnvironment testEnvironment) {
     var db = testEnvironment.postgres("db", "postgres:latest")
         .isStatic(true);
-    var mock = testEnvironment.mock("mock");
+    var mock = testEnvironment.mock("mock")
+        .init(mockView -> mockView.mockEndpoint("/abc", r -> "test"));
     testEnvironment.service("testTarget", "com.example/demo:latest")
         .env("LOG_LEVEL", "DEBUG")
         .env("GREETINGS_URL", mock.getBaseUrl())

@@ -13,6 +13,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * A test class that have @IsolatedAutoTest on it,
+ * also must have a method with @TestEnvironmentInitializer.
+ */
 @Parameterized.UseParametersRunnerFactory
 @ExtendWith({TestEnvironmentLifeCycleController.class})
 // DEFINED_PORT makes MVC run without mocks

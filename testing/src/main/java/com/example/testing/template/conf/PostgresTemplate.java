@@ -1,11 +1,16 @@
 package com.example.testing.template.conf;
 
+import com.example.testing.template.view.DbView;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import lombok.Getter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
 
 public class PostgresTemplate implements ApplicationTemplate {
 
@@ -20,6 +25,7 @@ public class PostgresTemplate implements ApplicationTemplate {
   private String postgresDatabase = "postgres";
   private String databaseUser = "my_db_user";
   private String databaseUserPassword = "my_db_user_password";
+  private final List<Consumer<DbView>> initializers = new ArrayList<>();
 
   public PostgresTemplate(String id, String imageName) {
     this.id = id;
@@ -90,6 +96,10 @@ public class PostgresTemplate implements ApplicationTemplate {
     hikariConfig.setDriverClassName(postgreSQLContainer.getDriverClassName());
     var dataSource = new HikariDataSource(hikariConfig);
     jdbcTemplate = new JdbcTemplate(dataSource);
+
+    var view = new DbView(this);
+    initializers.forEach(initializer ->
+        initializer.accept(view));
   }
 
   @Override
@@ -105,5 +115,11 @@ public class PostgresTemplate implements ApplicationTemplate {
     if (postgreSQLContainer != null && postgreSQLContainer.isCreated()) {
       postgreSQLContainer.close();
     }
+    initializers.clear();
+  }
+
+  public PostgresTemplate init(Consumer<DbView> initializer) {
+    initializers.add(initializer);
+    return this;
   }
 }

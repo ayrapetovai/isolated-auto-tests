@@ -1,12 +1,16 @@
 package com.example.testing.template.conf;
 
+import com.example.testing.template.view.RestView;
 import com.example.testing.util.DockerUtils;
 import lombok.Getter;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class ServiceTemplate implements ApplicationTemplate {
 
@@ -19,6 +23,8 @@ public class ServiceTemplate implements ApplicationTemplate {
   private GenericContainer<?> serviceContainer;
 
   private final Map<String, LazyGetter> env = new HashMap<>();
+
+  private final List<Consumer<RestView>> initializers = new ArrayList<>();
 
   public ServiceTemplate(String id, String imageName) {
     this.id = id;
@@ -80,6 +86,10 @@ public class ServiceTemplate implements ApplicationTemplate {
     env.forEach((name, lazyGetter) -> serviceContainer.withEnv(name, lazyGetter.get()));
     serviceContainer.start();
     serviceContainer.waitingFor(Wait.forListeningPort());
+
+    var view = new RestView(this);
+    initializers.forEach(initializer ->
+        initializer.accept(view));
   }
 
   @Override
@@ -95,5 +105,11 @@ public class ServiceTemplate implements ApplicationTemplate {
     if (serviceContainer != null && serviceContainer.isCreated()) {
       serviceContainer.close();
     }
+    initializers.clear();
+  }
+
+  public ServiceTemplate init(Consumer<RestView> initializer) {
+    initializers.add(initializer);
+    return this;
   }
 }
