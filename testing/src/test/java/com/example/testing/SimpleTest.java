@@ -85,7 +85,7 @@ public class SimpleTest {
     assertTrue(StringUtils.isNotBlank(userName));
 
     var substitutionForGreeting = "HELLO";
-    mock.mockEndpoint("/greetings/[0-2]{1}", 1, requestData -> {
+    mock.mockEndpoint("/greetings/[0-2]{1}", requestData -> {
       assertEquals("GET", requestData.method());
       var uri = requestData.uri();
       var paramString = uri.substring(uri.lastIndexOf('/') + 1);

@@ -20,6 +20,11 @@ public class MockView {
     mockTemplate.getRestMock().on(uriRegexp, allowedCalls, action);
   }
 
+  public void mockEndpoint(String uriRegexp, Function<RequestData, Object> action) {
+//    log.info("mock rest endpoint `{}`", uriRegexp);
+    mockTemplate.getRestMock().on(uriRegexp, Integer.MAX_VALUE, action);
+  }
+
   public void waitFor(String uriRegexp, int count, Duration duration) {
     mockTemplate.getRestMock().waitFor(uriRegexp, count, duration);
   }
