@@ -41,4 +41,8 @@ public class RestView {
   public RestTemplate getRestTemplate() {
     return getRestTemplate(true);
   }
+
+  public String getBaseUrl() {
+    return serviceTemplate.getBaseUrl().get();
+  }
 }
