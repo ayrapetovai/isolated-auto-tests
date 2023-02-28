@@ -18,4 +18,8 @@ public class MockView {
 //    log.info("mock rest endpoint `{}`", uriRegexp);
     mockTemplate.getRestMock().on(uriRegexp, action);
   }
+
+  public String getBaseUrl() {
+    return mockTemplate.getBaseUrl().get();
+  }
 }
