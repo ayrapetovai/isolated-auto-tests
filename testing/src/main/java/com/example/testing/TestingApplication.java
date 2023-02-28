@@ -8,10 +8,9 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Spliterator;
 import java.util.Spliterators;
@@ -29,8 +28,8 @@ public class TestingApplication {
 
 	private final RestMock restMock;
 
-	@GetMapping("/**")
-	public Object interceptor(HttpServletRequest request) throws IOException {
+	@RequestMapping("/**")
+	public Object interceptor(HttpServletRequest request) {
 		record Header(String name, String value) {}
 		var headerMap = StreamSupport.stream(
 						Spliterators.spliteratorUnknownSize(
