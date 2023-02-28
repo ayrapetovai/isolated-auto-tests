@@ -13,8 +13,10 @@ public class DockerUtils {
   public static Consumer<OutputFrame> createLogPrinter(Logger logger) {
     return of -> {
       var bytes = of.getBytes();
-      var length = bytes[bytes.length - 1] == '\n' ? bytes.length - 1 : bytes.length;
-      logger.info("{}", new String(bytes, 0, length));
+      if (bytes != null && bytes.length > 0) {
+        var length = bytes[bytes.length - 1] == '\n' ? bytes.length - 1 : bytes.length;
+        logger.info("{}", new String(bytes, 0, length));
+      }
     };
   }
 }
