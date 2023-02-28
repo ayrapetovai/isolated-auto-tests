@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 @Component
 public class RestMock {
 
-  record RequestHandler(int allowedCalls, Function<RequestData, Object> action, List<Exception> fails){}
+  record RequestHandler(int allowedCalls, Function<RequestData, Object> action, List<Throwable> fails){}
   private final Map<String, RequestHandler> requestHandlers = new HashMap<>();
   private final Map<String, Integer> registeredCalls = new ConcurrentHashMap<>();
 
@@ -29,37 +29,34 @@ public class RestMock {
   }
 
   protected Object handle(String uri, RequestData requestData) {
-    RequestHandler requestHandler = null;
-    try {
-      var keyList = requestHandlers.keySet()
-          .stream()
-          .filter(uriRegexp -> Pattern.compile(uriRegexp).matcher(uri).matches())
-          .toList();
-      if (keyList.isEmpty()) {
-        throw new IllegalArgumentException("cannot find action for uri '" + uri + "', actions " + requestHandlers.keySet());
-      }
-      if (keyList.size() > 1) {
-        throw new IllegalArgumentException("more then one action action is found for uri '" + uri + "', actions " + requestHandlers.keySet());
-      }
-      var key = keyList.get(0);
-      requestHandler = requestHandlers.get(key);
-      synchronized (registeredCalls) {
-        int currentCount = registeredCalls.computeIfAbsent(key, k -> 0);
-        if (currentCount + 1 > requestHandler.allowedCalls()) {
-          requestHandler.fails.add(new IllegalStateException("too many calls, allowed " + requestHandler.allowedCalls() + ", but got " + (currentCount + 1)));
-        }
-        try {
-          return requestHandler.action.apply(requestData);
-        } finally {
-          registeredCalls.put(key, currentCount + 1);
-        }
-      }
-    } catch (Exception e) {
-      if (requestHandler != null) {
+    var keyList = requestHandlers.keySet()
+        .stream()
+        .filter(uriRegexp -> Pattern.compile(uriRegexp).matcher(uri).matches())
+        .toList();
+    if (keyList.isEmpty()) {
+      throw new IllegalArgumentException("cannot find action for uri '" + uri + "', actions " + requestHandlers.keySet());
+    }
+    if (keyList.size() > 1) {
+      throw new IllegalArgumentException("more then one action action is found for uri '" + uri + "', actions " + requestHandlers.keySet());
+    }
+    var key = keyList.get(0);
+    RequestHandler requestHandler = requestHandlers.get(key);
+    synchronized (registeredCalls) {
+      int currentCount = registeredCalls.computeIfAbsent(key, k -> 0);
+      if (currentCount + 1 > requestHandler.allowedCalls()) {
+        var e = new IllegalStateException("too many calls, allowed " + requestHandler.allowedCalls() + ", but got " + (currentCount + 1));
         requestHandler.fails.add(e);
+        throw e;
+      }
+      try {
+        return requestHandler.action.apply(requestData);
+      } catch (Throwable e) {
+        requestHandler.fails.add(e);
+        throw e;
+      } finally {
+        registeredCalls.put(key, currentCount + 1);
       }
     }
-    return null;
   }
 
   public void clear() {

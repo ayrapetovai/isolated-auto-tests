@@ -8,26 +8,26 @@ import java.util.stream.Collectors;
 
 public class AggregateException extends RuntimeException {
 
-  private final List<? extends Exception> fails;
+  private final List<? extends Throwable> fails;
 
-  public AggregateException(String message, List<? extends Exception> fails) {
+  public AggregateException(String message, List<? extends Throwable> fails) {
     super(message);
     this.fails = new ArrayList<>(fails);
   }
 
-  public AggregateException(List<? extends Exception> fails) {
+  public AggregateException(List<? extends Throwable> fails) {
     this.fails = new ArrayList<>(fails);
   }
 
   @Override
   public String getMessage() {
-    return super.getMessage() + ": " + fails.stream().map(Exception::getMessage)
+    return super.getMessage() + ": " + fails.stream().map(Throwable::getMessage)
         .collect(Collectors.joining(";"));
   }
 
   @Override
   public String getLocalizedMessage() {
-    return super.getLocalizedMessage() + ": " + fails.stream().map(Exception::getLocalizedMessage)
+    return super.getLocalizedMessage() + ": " + fails.stream().map(Throwable::getLocalizedMessage)
         .collect(Collectors.joining(";"));
   }
 
