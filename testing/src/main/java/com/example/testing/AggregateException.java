@@ -2,17 +2,31 @@ package com.example.testing;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
-public class RestMockHasFailedException extends RuntimeException {
-  private final List<Exception> fails;
+public class AggregateException extends RuntimeException {
 
-  public RestMockHasFailedException(List<Exception> fails) {
-    super("rest mock error list");
-    this.fails = Collections.unmodifiableList(fails);
+  private final List<? extends Exception> fails;
+
+  public AggregateException(List<? extends Exception> fails) {
+    this.fails = new ArrayList<>(fails);
   }
 
+  @Override
+  public String getMessage() {
+    return fails.stream().map(Exception::getMessage)
+        .collect(Collectors.joining(";"));
+  }
+
+  @Override
+  public String getLocalizedMessage() {
+    return fails.stream().map(Exception::getLocalizedMessage)
+        .collect(Collectors.joining(";"));
+  }
+
+  @Override
   public String toString() {
     String s = getClass().getName();
     String message = getLocalizedMessage();

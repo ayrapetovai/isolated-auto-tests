@@ -9,7 +9,7 @@ public class MockTemplate implements ApplicationTemplate {
 
   private final String id;
   @Getter
-  private final boolean isStatic = true;
+  private final boolean isStatic = false;
   private Integer selfPort;
   @Getter
   private RestMock restMock;
@@ -35,10 +35,11 @@ public class MockTemplate implements ApplicationTemplate {
 
   @Override
   public void close() {
+    restMock.clear();
   }
 
   @Override
   public void finallyClose() {
-
+    restMock.clear();
   }
 }

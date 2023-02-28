@@ -10,6 +10,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.platform.commons.util.StringUtils;
 import org.springframework.http.HttpStatus;
 
+import java.time.Duration;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -84,7 +85,7 @@ public class SimpleTest {
     assertTrue(StringUtils.isNotBlank(userName));
 
     var substitutionForGreeting = "HELLO";
-    mock.mockEndpoint("/greetings/[0-2]{1}", requestData -> {
+    mock.mockEndpoint("/greetings/[0-2]{1}", 1, requestData -> {
       assertEquals("GET", requestData.method());
       var uri = requestData.uri();
       var paramString = uri.substring(uri.lastIndexOf('/') + 1);
@@ -97,6 +98,8 @@ public class SimpleTest {
     var message = testTarget.getRestTemplate()
         .getForObject("/greeting/" + userId, String.class);
     assertEquals(expectedMessage, message);
+
+    mock.waitFor("/greetings/[0-2]{1}", 1, Duration.ofDays(1));
   }
 
 }
