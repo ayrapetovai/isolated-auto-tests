@@ -1,9 +1,11 @@
 package com.example.testing.template.conf;
 
 import com.example.testing.template.view.DbView;
+import com.example.testing.util.DockerUtils;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import lombok.Getter;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
@@ -18,6 +20,7 @@ public class PostgresTemplate implements ApplicationTemplate {
   private final String imageName;
   @Getter
   private boolean isStatic = false;
+  private boolean printLogs = false;
   private PostgreSQLContainer<?> postgreSQLContainer;
   @Getter
   private JdbcTemplate jdbcTemplate;
@@ -74,6 +77,11 @@ public class PostgresTemplate implements ApplicationTemplate {
     return id;
   }
 
+  public PostgresTemplate printLogs(boolean printLogs) {
+    this.printLogs = printLogs;
+    return this;
+  }
+
   @Override
   public void createAndAwait() {
     if (isStatic && postgreSQLContainer != null && postgreSQLContainer.isCreated()) {
@@ -86,6 +94,12 @@ public class PostgresTemplate implements ApplicationTemplate {
         .withPassword(databaseUserPassword)
         .withEnv("PGPORT", String.valueOf(postgresPort)) // TODO: this line does not anything
         .withExposedPorts(postgresPort);
+
+    if (printLogs) {
+      var logger = LoggerFactory.getLogger(id);
+      postgreSQLContainer.withLogConsumer(DockerUtils.createLogPrinter(logger));
+    }
+
     postgreSQLContainer.start();
     postgreSQLContainer.waitingFor(Wait.forListeningPort());
 

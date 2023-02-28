@@ -3,6 +3,7 @@ package com.example.testing.template.conf;
 import com.example.testing.template.view.RestView;
 import com.example.testing.util.DockerUtils;
 import lombok.Getter;
+import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 
@@ -18,6 +19,7 @@ public class ServiceTemplate implements ApplicationTemplate {
   private final String imageName;
   @Getter
   private boolean isStatic = false;
+  private boolean printLogs = false;
   private int servicePort = 8080;
 
   private GenericContainer<?> serviceContainer;
@@ -56,6 +58,11 @@ public class ServiceTemplate implements ApplicationTemplate {
     return this;
   }
 
+  public ServiceTemplate printLogs(boolean printLogs) {
+    this.printLogs = printLogs;
+    return this;
+  }
+
   public int getMapperServicePort() {
     return serviceContainer.getMappedPort(servicePort);
   }
@@ -84,6 +91,12 @@ public class ServiceTemplate implements ApplicationTemplate {
         .withExposedPorts(servicePort)
         .withEnv("PORT", String.valueOf(servicePort));
     env.forEach((name, lazyGetter) -> serviceContainer.withEnv(name, lazyGetter.get()));
+
+    if (printLogs) {
+      var logger = LoggerFactory.getLogger(id);
+      serviceContainer.withLogConsumer(DockerUtils.createLogPrinter(logger));
+    }
+
     serviceContainer.start();
     serviceContainer.waitingFor(Wait.forListeningPort());
 
