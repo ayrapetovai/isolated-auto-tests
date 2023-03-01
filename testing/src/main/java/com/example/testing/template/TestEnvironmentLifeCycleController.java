@@ -123,7 +123,9 @@ public class TestEnvironmentLifeCycleController implements ParameterResolver, Be
       return;
     }
     var testEnvironment = environmentsByTestClasses.get(testClass);
-    testEnvironment.closeAll();
+    if (testEnvironment != null) {
+      testEnvironment.closeAll();
+    }
     environmentsByTestClasses.put(testClass, null);
   }
 
